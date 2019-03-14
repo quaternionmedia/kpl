@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="deps/smoothie.js"></script>
+<body onload="createTimeline()">
+  <script>
+  var data = new TimeSeries();
+
+  function createTimeline() {
+       var chart = new SmoothieChart({responsive: true});
+       chart.addTimeSeries(data, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+       chart.streamTo(document.getElementById("chart"), 500);
+     }
+
+     var ws = new WebSocket("ws://localhost:8000/krpc");
+
+     ws.onmessage = async function(event) {
+       result = await event.data;
+       console.log('got data! ', result)
+     };
+  </script>
+  <canvas id="chart" style="width:100%; height:200px"></canvas>
+
+</html>
