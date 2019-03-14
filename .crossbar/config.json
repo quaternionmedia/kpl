@@ -42,7 +42,7 @@
                         "paths": {
                             "/": {
                                 "type": "static",
-                                "directory": "../static"
+                                "directory": ".."
                             },
                         "ws": {
                             "type": "websocket"

@@ -2,23 +2,39 @@
 <meta charset="utf-8">
 
 <script src="deps/smoothie.js"></script>
+<script src="deps/autobahn.js"></script>
+
 <body onload="createTimeline()">
   <script>
-  var data = new TimeSeries();
+  var wsuri = "ws://" + window.location.hostname + ":7777/ws";
+  var connection;
+  function connectToCrossbar() {
+    connection = new autobahn.Connection({
+      url: wsuri,
+      realm: "realm1"
+    }
+  );
+  connection.onopen = function (session, details) {
+    console.log("Connected: ", details);
+    session.subscribe('local.krpc.position', updatePosition)
+  }
+  connection.open();
 
-  function createTimeline() {
-       var chart = new SmoothieChart({responsive: true});
-       chart.addTimeSeries(data, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
-       chart.streamTo(document.getElementById("chart"), 500);
-     }
+}
+var data = new TimeSeries();
 
-     var ws = new WebSocket("ws://localhost:8000/krpc");
+function createTimeline() {
+  var chart = new SmoothieChart({responsive: true});
+  chart.addTimeSeries(data, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+  chart.streamTo(document.getElementById("chart"), 500);
+}
 
-     ws.onmessage = async function(event) {
-       result = await event.data;
-       console.log('got data! ', result)
-     };
-  </script>
-  <canvas id="chart" style="width:100%; height:200px"></canvas>
+function updatePosition(p) {
+  console.log("new position! ", p);
+}
+connectToCrossbar();
+
+</script>
+<canvas id="chart" style="width:100%; height:200px"></canvas>
 
 </html>
