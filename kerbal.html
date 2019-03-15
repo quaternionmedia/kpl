@@ -4,37 +4,120 @@
 <script src="deps/smoothie.js"></script>
 <script src="deps/autobahn.js"></script>
 
+<link href="deps/c3.css" rel="stylesheet">
+<script src="deps/d3.js" charset="utf-8"></script>
+<script src="deps/c3.js"></script>
 <body onload="createTimeline()">
-  <script>
-  var wsuri = "ws://" + window.location.hostname + ":7777/ws";
-  var connection;
-  function connectToCrossbar() {
-    connection = new autobahn.Connection({
-      url: wsuri,
-      realm: "realm1"
-    }
-  );
-  connection.onopen = function (session, details) {
-    console.log("Connected: ", details);
-    session.subscribe('local.krpc.position', updatePosition)
+<canvas id="canvas" style="width:100%; height:200px"></canvas>
+<!-- <div class="control"><label class="slider" for="input1">Scroll speed</label><input id="input1" type="range" min="1" max="100" oninput="updateScroll()"></div> -->
+<div class='chart'>
+<div id='chart'></div>
+<script>
+var smooth, chart;
+var options = {responsive: true, millisPerPixel:10}
+var canvas = document.getElementById('canvas');
+var chartLoaded = false;
+var wsuri = "ws://" + window.location.hostname + ":7777/ws";
+var connection;
+var newData = [[], [], [], []];
+
+function connectToCrossbar() {
+  connection = new autobahn.Connection({
+    url: wsuri,
+    realm: "realm1"
   }
-  connection.open();
+);
+connection.onopen = function (session, details) {
+  console.log("Connected: ", details);
+  session.subscribe('local.krpc.position', updatePosition);
+}
+connection.open();
 
 }
-var data = new TimeSeries();
+var posX = new TimeSeries();
+var posY = new TimeSeries();
+var posZ = new TimeSeries();
+var input1 = document.getElementById("input1");
+var t0 = new Date().getTime();
 
 function createTimeline() {
-  var chart = new SmoothieChart({responsive: true});
-  chart.addTimeSeries(data, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
-  chart.streamTo(document.getElementById("chart"), 500);
+var smooth = new SmoothieChart(options);
+smooth.addTimeSeries(posX, { strokeStyle: 'rgba(255, 0, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+smooth.addTimeSeries(posY, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+smooth.addTimeSeries(posZ, { strokeStyle: 'rgba(0, 0, 255, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+smooth.streamTo(document.getElementById("canvas"), 500);
+
+console.log('creating chart!');
+
+chart = c3.generate({
+    data: {
+        x: 't',
+//        xFormat: '%Y%m%d', // 'xFormat' can be used as custom format of 'x'
+        columns: [
+            ['t', t0],
+            ['x', 0],
+            ['y', 0],
+            ['z', 100],
+//            ['x', '20130101', '20130102', '20130103', '20130104', '20130105', '20130106'],
+            // ['data1', 30, 200, 100, 400, 150, 250],
+            // ['data2', 130, 340, 200, 500, 250, 350]
+        ]
+    },
+    axis: {
+        x: {
+            min: t0,
+            type: 'timeseries',
+            zoom: {
+              type: 'scroll',
+              rescale: false
+            }            // tick: {
+            //     format: '%Y-%m-%d'
+            // }
+        }
+    }
+});
+chartLoaded = true;
+
 }
 
-function updatePosition(p) {
-  console.log("new position! ", p);
+function updatePosition(pos) {
+  if (chartLoaded) {
+  var p = pos[0];
+t = new Date().getTime();
+// console.log("new position! ", p[0]);
+posX.append(t, p[0]);
+posY.append(t, p[1]);
+posZ.append(t, p[2]);
+
+newData[0].push(t);
+newData[1].push(p[0]);
+newData[2].push(p[1]);
+newData[3].push(p[2]);
+
+}
+}
+// function updateScroll() {
+//   options['millisPerPixel']=input1.value;
+//
+// }
+
+function updateData() {
+  chart.flow({columns:[
+                          ['t', ...newData[0]],
+                          ['x', ...newData[1]],
+                          ['y', ...newData[2]],
+                          ['z', ...newData[3]]
+                        ],
+              length : 0,
+                      }
+            );
+newData = [[], [], [], []];
 }
 connectToCrossbar();
+setInterval(updateData, 500);
+
 
 </script>
-<canvas id="chart" style="width:100%; height:200px"></canvas>
+</body>
 
 </html>

@@ -10,12 +10,16 @@ class Ckerbal(ApplicationSession):
         self.conn = krpc.connect(name='george')
         self.vessel = self.conn.space_center.active_vessel
         self.refframe = self.vessel.orbit.body.reference_frame
+        self.lpos = time()
         def getPos():
             with self.conn.stream(self.vessel.position, self.refframe) as p:
                 with p.condition:
-                    pos = p()
-                    print('new position', pos, time())
-                    self.publish(u'local.krpc.position', pos)
+                    if time() - self.lpos > .1:
+                        self.lpos = time();
+                        pos = p()
+                        # print('new position', pos, time())
+                        self.publish(u'local.krpc.position', pos)
+
         while True:
             getPos()
 
