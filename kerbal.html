@@ -8,113 +8,119 @@
 <script src="deps/d3.js" charset="utf-8"></script>
 <script src="deps/c3.js"></script>
 <body onload="createTimeline()">
-<canvas id="canvas" style="width:100%; height:200px"></canvas>
-<!-- <div class="control"><label class="slider" for="input1">Scroll speed</label><input id="input1" type="range" min="1" max="100" oninput="updateScroll()"></div> -->
-<div class='chart'>
-<div id='chart'></div>
-<script>
-var smooth, chart;
-var options = {responsive: true, millisPerPixel:10}
-var canvas = document.getElementById('canvas');
-var chartLoaded = false;
-var wsuri = "ws://" + window.location.hostname + ":7777/ws";
-var connection;
-var newData = [[], [], [], []];
+  <canvas id="canvas" style="width:100%; height:200px"></canvas>
+  <!-- <div class="control"><label class="slider" for="input1">Scroll speed</label><input id="input1" type="range" min="1" max="100" oninput="updateScroll()"></div> -->
+  <div class='chart'>
+    <div id='chart'></div>
+    <script>
+    var smooth, chart;
+    var options = {responsive: true, millisPerPixel:10}
+    var canvas = document.getElementById('canvas');
+    var chartLoaded = false;
+    var wsuri = "ws://" + window.location.hostname + ":7777/ws";
+    var connection;
+    var newX = newY = newZ = newT = [];
+    var chartLengh = 0;
+    var chartMax = 100;
+    let average = (array) => array.reduce((a, b) => a + b, 0) / array.length;
 
-function connectToCrossbar() {
-  connection = new autobahn.Connection({
-    url: wsuri,
-    realm: "realm1"
+
+    function connectToCrossbar() {
+      connection = new autobahn.Connection({
+        url: wsuri,
+        realm: "realm1"
+      }
+    );
+    connection.onopen = function (session, details) {
+      console.log("Connected: ", details);
+      session.subscribe('local.krpc.position', updatePosition);
+    }
+    connection.open();
+
+  }
+  var posX = new TimeSeries();
+  var posY = new TimeSeries();
+  var posZ = new TimeSeries();
+  var input1 = document.getElementById("input1");
+  var t0 = new Date().getTime();
+
+  function createTimeline() {
+    var smooth = new SmoothieChart(options);
+    smooth.addTimeSeries(posX, { strokeStyle: 'rgba(255, 0, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+    smooth.addTimeSeries(posY, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+    smooth.addTimeSeries(posZ, { strokeStyle: 'rgba(0, 0, 255, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
+    smooth.streamTo(document.getElementById("canvas"), 500);
+
+    console.log('creating chart!');
+
+    chart = c3.generate({
+      data: {
+        x: 't',
+        //        xFormat: '%Y%m%d', // 'xFormat' can be used as custom format of 'x'
+        columns: [
+          ['t', t0],
+          ['x', NaN],
+          ['y', NaN],
+          ['z', NaN],
+          //            ['x', '20130101', '20130102', '20130103', '20130104', '20130105', '20130106'],
+          // ['data1', 30, 200, 100, 400, 150, 250],
+          // ['data2', 130, 340, 200, 500, 250, 350]
+        ]
+      },
+      axis: {
+        x: {
+          min: t0,
+          type: 'timeseries',
+          // zoom: {
+          //   type: 'scroll',
+          //   rescale: false
+          // }            // tick: {
+          //     format: '%Y-%m-%d'
+          // }
+        }
+      }
+    });
+    chartLoaded = true;
+
+  }
+
+  function updatePosition(pos) {
+    if (chartLoaded) {
+      var p = pos[0];
+      t = new Date().getTime();
+      // console.log("new position! ", p);
+      posX.append(t, p[0]);
+      posY.append(t, p[1]);
+      posZ.append(t, p[2]);
+      
+      newT.push(t);
+      newX.push(p[0]);
+      newY.push(p[1]);
+      newZ.push(p[2]);
+
+    }
+  }
+  // function updateScroll() {
+  //   options['millisPerPixel']=input1.value;
+  //
+  // }
+
+  function updateData() {
+    chart.flow({columns:[
+      ['t', newT[0]], // Math.floor(newT.length/2)]],
+      ['x', newX[1]], //average(newX)],
+      ['y', newY[2]],
+      ['z', newZ[3]]
+    ],
+    length : chartLengh++ < chartMax ? 0 : 1,
   }
 );
-connection.onopen = function (session, details) {
-  console.log("Connected: ", details);
-  session.subscribe('local.krpc.position', updatePosition);
-}
-connection.open();
+// newData = [[], [], [], []];
+newX = newY = newZ = newT = [];
 
-}
-var posX = new TimeSeries();
-var posY = new TimeSeries();
-var posZ = new TimeSeries();
-var input1 = document.getElementById("input1");
-var t0 = new Date().getTime();
-
-function createTimeline() {
-var smooth = new SmoothieChart(options);
-smooth.addTimeSeries(posX, { strokeStyle: 'rgba(255, 0, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
-smooth.addTimeSeries(posY, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
-smooth.addTimeSeries(posZ, { strokeStyle: 'rgba(0, 0, 255, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
-smooth.streamTo(document.getElementById("canvas"), 500);
-
-console.log('creating chart!');
-
-chart = c3.generate({
-    data: {
-        x: 't',
-//        xFormat: '%Y%m%d', // 'xFormat' can be used as custom format of 'x'
-        columns: [
-            ['t', t0],
-            ['x', 0],
-            ['y', 0],
-            ['z', 100],
-//            ['x', '20130101', '20130102', '20130103', '20130104', '20130105', '20130106'],
-            // ['data1', 30, 200, 100, 400, 150, 250],
-            // ['data2', 130, 340, 200, 500, 250, 350]
-        ]
-    },
-    axis: {
-        x: {
-            min: t0,
-            type: 'timeseries',
-            zoom: {
-              type: 'scroll',
-              rescale: false
-            }            // tick: {
-            //     format: '%Y-%m-%d'
-            // }
-        }
-    }
-});
-chartLoaded = true;
-
-}
-
-function updatePosition(pos) {
-  if (chartLoaded) {
-  var p = pos[0];
-t = new Date().getTime();
-// console.log("new position! ", p[0]);
-posX.append(t, p[0]);
-posY.append(t, p[1]);
-posZ.append(t, p[2]);
-
-newData[0].push(t);
-newData[1].push(p[0]);
-newData[2].push(p[1]);
-newData[3].push(p[2]);
-
-}
-}
-// function updateScroll() {
-//   options['millisPerPixel']=input1.value;
-//
-// }
-
-function updateData() {
-  chart.flow({columns:[
-                          ['t', ...newData[0]],
-                          ['x', ...newData[1]],
-                          ['y', ...newData[2]],
-                          ['z', ...newData[3]]
-                        ],
-              length : 0,
-                      }
-            );
-newData = [[], [], [], []];
 }
 connectToCrossbar();
-setInterval(updateData, 500);
+setInterval(updateData, 1000);
 
 
 </script>
