@@ -9,12 +9,12 @@
 <script src="deps/c3.js"></script>
 <body onload="createTimeline()">
   <canvas id="canvas" style="width:100%; height:200px"></canvas>
-  <!-- <div class="control"><label class="slider" for="input1">Scroll speed</label><input id="input1" type="range" min="1" max="100" oninput="updateScroll()"></div> -->
+  <div class="control"><label class="slider" for="input1">Scroll speed</label><input id="input1" type="range" min="1" max="100" oninput="updateScroll()"></div>
   <div class='chart'>
     <div id='chart'></div>
     <script>
     var smooth, chart;
-    var options = {responsive: true, millisPerPixel:10}
+    var options = {responsive: true, millisPerPixel:50}
     var canvas = document.getElementById('canvas');
     var chartLoaded = false;
     var wsuri = "ws://" + window.location.hostname + ":7777/ws";
@@ -25,7 +25,7 @@
     var newT = [];
     var oldT = [];
     var chartLength = 0;
-    var chartMax = 10;
+    var chartMax = 100;
     let average = (array) => array.reduce((a, b) => a + b, 0) / array.length;
 
 
@@ -49,7 +49,7 @@
   var t0 = new Date().getTime();
 
   function createTimeline() {
-    var smooth = new SmoothieChart(options);
+    smooth = new SmoothieChart(options);
     smooth.addTimeSeries(posX, { strokeStyle: 'rgba(255, 0, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
     smooth.addTimeSeries(posY, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
     smooth.addTimeSeries(posZ, { strokeStyle: 'rgba(0, 0, 255, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 4 });
@@ -110,10 +110,10 @@
 
     }
   }
-  // function updateScroll() {
-  //   options['millisPerPixel']=input1.value;
-  //
-  // }
+  function updateScroll() {
+    smooth.options['millisPerPixel']=input1.value;
+
+  }
 
   function updateData() {
     console.log('flowing ', newT[0], newX[0], newY[0], newZ[0]);
@@ -132,7 +132,6 @@
 // newData = [[], [], [], []];
 
 oldT.push(newT[0]);
-console.log('pushing ', oldT[0]);
 if (oldT.length >= chartMax) {
   console.log('shifting oldT', oldT.length, oldT);
   oldT.shift();
