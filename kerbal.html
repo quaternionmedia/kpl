@@ -19,9 +19,13 @@
     var chartLoaded = false;
     var wsuri = "ws://" + window.location.hostname + ":7777/ws";
     var connection;
-    var newX = newY = newZ = newT = [];
-    var chartLengh = 0;
-    var chartMax = 100;
+    var newX = [];
+    var newY = [];
+    var newZ = [];
+    var newT = [];
+    var oldT = [];
+    var chartLength = 0;
+    var chartMax = 10;
     let average = (array) => array.reduce((a, b) => a + b, 0) / array.length;
 
 
@@ -58,18 +62,23 @@
         x: 't',
         //        xFormat: '%Y%m%d', // 'xFormat' can be used as custom format of 'x'
         columns: [
-          ['t', t0],
-          ['x', NaN],
-          ['y', NaN],
-          ['z', NaN],
+          ['t'],
+          ['x'],
+          ['y'],
+          ['z'],
           //            ['x', '20130101', '20130102', '20130103', '20130104', '20130105', '20130106'],
           // ['data1', 30, 200, 100, 400, 150, 250],
           // ['data2', 130, 340, 200, 500, 250, 350]
-        ]
+        ],
+        colors: {
+          x: '#ff0000',
+          y: '#00ff00',
+          z: '#0000ff',
+        },
       },
       axis: {
         x: {
-          min: t0,
+          // min: t0,
           type: 'timeseries',
           // zoom: {
           //   type: 'scroll',
@@ -78,7 +87,8 @@
           //     format: '%Y-%m-%d'
           // }
         }
-      }
+      },
+
     });
     chartLoaded = true;
 
@@ -92,7 +102,7 @@
       posX.append(t, p[0]);
       posY.append(t, p[1]);
       posZ.append(t, p[2]);
-      
+
       newT.push(t);
       newX.push(p[0]);
       newY.push(p[1]);
@@ -106,18 +116,31 @@
   // }
 
   function updateData() {
+    console.log('flowing ', newT[0], newX[0], newY[0], newZ[0]);
     chart.flow({columns:[
       ['t', newT[0]], // Math.floor(newT.length/2)]],
-      ['x', newX[1]], //average(newX)],
-      ['y', newY[2]],
-      ['z', newZ[3]]
+      ['x', newX[0]], //average(newX)],
+      ['y', newY[0]],
+      ['z', newZ[0]]
     ],
-    length : chartLengh++ < chartMax ? 0 : 1,
+
+    length : chartLength++ < chartMax ? 0 : 1,
+    // axis: { x : oldT[0]},
   }
 );
+// chart.axis.min({ x : oldT[0]});
 // newData = [[], [], [], []];
-newX = newY = newZ = newT = [];
 
+oldT.push(newT[0]);
+console.log('pushing ', oldT[0]);
+if (oldT.length >= chartMax) {
+  console.log('shifting oldT', oldT.length, oldT);
+  oldT.shift();
+}
+newX = [];
+newY = [];
+newZ = [];
+newT = [];
 }
 connectToCrossbar();
 setInterval(updateData, 1000);
