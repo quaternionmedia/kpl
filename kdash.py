@@ -42,7 +42,7 @@ def Add_Dash(server):
         html.H1(children='KPL!'),
         html.Div(children='Kerbal Propulsion Laborotory'),
         html.H3(children='- Dashboard -'),
-        daq.Gauge(id='therm', min=0, max=330, value=0),
+        daq.Gauge(id='therm', min=0, max=2000, value=0),
         html.P(id='thermValue'),
         # dcc.Graph(id='thermGraph'),
         ex.ExtendableGraph(id='exGraph', figure={'data': [{'x':[], 'y':[]}]}),
@@ -57,8 +57,8 @@ def Add_Dash(server):
                         [Input('interval-component', 'n_intervals')])
     def update_therm(n):
         temps.append(getFlightChars(flightStats()))
-        print('static air temp: ', temps[-1]['static_air_temperature'])
-        return temps[-1]['static_air_temperature']
+        print('speed: ', temps[-1]['speed'])
+        return temps[-1]['speed']
 
 
     @dash_app.callback(Output('exGraph', 'extendData'),
@@ -67,7 +67,7 @@ def Add_Dash(server):
     def update_therm_graph(n, fig):
 
         return [ {  'x': [temps[-1]['time']] ,
-                    'y' : [temps[-1]['static_air_temperature']] } ]
+                    'y' : [temps[-1]['speed']] } ]
 
 
     return dash_app.server
