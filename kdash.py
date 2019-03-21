@@ -4,18 +4,35 @@ from dash import Dash
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output #, Event
+from dash.dependencies import Input, Output, State#, Event
+import plotly.graph_objs as go
+import dash_extendable_graph as ex
 import dash_daq as daq
 import pandas as pd
 from random import random
-tmp = 0
-
+from time import time
+from collections import deque
+import krpc
+temps = deque(maxlen=10)
+# temps = pd.DataFrame({  'temps': [0],
+                        # 'times': [time()] })
+# archive = []
 p = Path('.')
 
 flight_chars = ['aerodynamic_force', 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'center_of_mass', 'direction', 'drag', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'lift', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll', 'rotation', 'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'velocity', 'vertical_speed']
 
 def Add_Dash(server):
     dash_app = Dash(server=server, url_base_pathname='/kdash/')
+    conn = krpc.connect(name='kdash')
+    vessel = conn.space_center.active_vessel
+    refframe = vessel.orbit.body.reference_frame
+    def getFlightChars(x):
+        j = {i: getattr(x, i) for i in flight_chars}
+        j['time'] = time()
+        return j
+    flightStats = conn.add_stream(vessel.flight, refframe)
+    # flightStats.add_callback(getFlightChars)
+    # flightStats.start()
     # dash_app.css.append_css({
     #     "external_url": "https://derp.sfo2.digitaloceanspaces.com/style.css"
     #     })
@@ -25,19 +42,33 @@ def Add_Dash(server):
         html.H1(children='KPL!'),
         html.Div(children='Kerbal Propulsion Laborotory'),
         html.H3(children='- Dashboard -'),
-        daq.Thermometer(id='therm', min=0, max=100, value=98.6),
-        dcc.Graph(id='thremGraph'),
+        daq.Gauge(id='therm', min=0, max=330, value=0),
+        html.P(id='thermValue'),
+        # dcc.Graph(id='thermGraph'),
+        ex.ExtendableGraph(id='exGraph', figure={'data': [{'x':[], 'y':[]}]}),
         dcc.Interval(id='interval-component', interval = 1000, n_intervals=0)
         # get_datasets()
         ]
 
       )
 
+
     @dash_app.callback(Output('therm', 'value'),
                         [Input('interval-component', 'n_intervals')])
     def update_therm(n):
-        print(n)
-        return random()*100
+        temps.append(getFlightChars(flightStats()))
+        print('static air temp: ', temps[-1]['static_air_temperature'])
+        return temps[-1]['static_air_temperature']
+
+
+    @dash_app.callback(Output('exGraph', 'extendData'),
+                        [Input('interval-component', 'n_intervals')],
+                        [State('exGraph', 'figure')])
+    def update_therm_graph(n, fig):
+
+        return [ {  'x': [temps[-1]['time']] ,
+                    'y' : [temps[-1]['static_air_temperature']] } ]
+
 
     return dash_app.server
 
