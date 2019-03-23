@@ -13,21 +13,27 @@ from random import random
 from time import time
 from collections import deque
 import krpc
-temps = deque(maxlen=10)
+temps = deque([{'time':None, 'speed':None}], maxlen=10)
 # temps = pd.DataFrame({  'temps': [0],
                         # 'times': [time()] })
-# archive = []
-p = Path('.')
 
-flight_chars = ['aerodynamic_force', 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'center_of_mass', 'direction', 'drag', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'lift', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll', 'rotation', 'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'velocity', 'vertical_speed']
+
+floats = [ 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'lift', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll',  'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'velocity', 'vertical_speed']
+
+vectors = ['aerodynamic_force', 'center_of_mass', 'direction', 'drag', ]
+quaternions = ['rotation']
+
 
 def Add_Dash(server):
     dash_app = Dash(server=server, url_base_pathname='/kdash/')
+    dash_app.title = 'kerbal dashboard'
+    dash_app.css.config.serve_locally = True
+    dash_app.scripts.config.serve_locally = True
     conn = krpc.connect(name='kdash')
     vessel = conn.space_center.active_vessel
     refframe = vessel.orbit.body.reference_frame
     def getFlightChars(x):
-        j = {i: getattr(x, i) for i in flight_chars}
+        j = {i: getattr(x, i) for i in floats}
         j['time'] = time()
         return j
     flightStats = conn.add_stream(vessel.flight, refframe)
@@ -38,19 +44,25 @@ def Add_Dash(server):
     #     })
 
     # Create layout
-    dash_app.layout = html.Div(id='flex-container', children=[
-        html.H1(children='KPL!'),
-        html.Div(children='Kerbal Propulsion Laborotory'),
-        html.H3(children='- Dashboard -'),
-        daq.Gauge(id='therm', min=0, max=2000, value=0),
-        html.P(id='thermValue'),
-        # dcc.Graph(id='thermGraph'),
-        ex.ExtendableGraph(id='exGraph', figure={'data': [{'x':[], 'y':[]}]}),
-        dcc.Interval(id='interval-component', interval = 1000, n_intervals=0)
-        # get_datasets()
-        ]
-
-      )
+    dash_app.layout = html.Div(id='flex-container', className='flex-container', children=[
+            html.Div(id='header', className='twelve columns', style= {'align': 'center', 'background-color': '#222'}, children=[
+                html.H1(className='two columns', children='KPL!'),
+                html.H2(className='eight columns', children='Kerbal Propulsion Laborotory'),
+                html.H3(className='two columns', children='Dashboard')
+                ]),
+            html.Div(id='speeds', className='twelve columns', children=[
+                daq.Gauge(id='therm', label='speed', min=0, max=2000, value=0, className='three columns', style={'padding-left': '10%'}),
+                # dcc.Graph(id='thermGraph'),
+                ex.ExtendableGraph(id='exGraph', className='nine columns', figure={'data': [{'x':[], 'y':[]}]}, )
+                ]),
+            html.Div(id='gauges', className='twelve columns', children=[
+                # get_datasets()
+                *[ daq.Gauge(id=i, label=i, min=0, max=1000, value=0, size=110, className='one column', style={'padding-left': '5%'}) for i in floats]
+                ]),
+            dcc.Interval(id='interval-component', interval = 1000, n_intervals=0),
+            dcc.Store(id='session'),#, storage_type='session'),
+                ]
+            )
 
 
     @dash_app.callback(Output('therm', 'value'),
