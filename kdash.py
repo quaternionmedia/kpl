@@ -51,13 +51,13 @@ def Add_Dash(server):
                 html.H3(className='two columns', children='Dashboard')
                 ]),
             html.Div(id='speeds', className='twelve columns', children=[
-                daq.Gauge(id='therm', label='speed', min=0, max=200, value=0, className='three columns', labelPosition='bottom', showCurrentValue=True, style={'padding-left': '10%'}),
+                # daq.Gauge(id='therm', label='speed', min=0, max=200, value=0, className='three columns', labelPosition='bottom', showCurrentValue=True, style={'padding-left': '10%'}),
                 # dcc.Graph(id='thermGraph'),
-                ex.ExtendableGraph(id='exGraph', className='nine columns', figure={'data': [{'x':[], 'y':[]}]}, )
+                ex.ExtendableGraph(id='exGraph', className='twelve columns', figure={'data': [{'x':[], 'y':[]}]}, )
                 ]),
             html.Div(id='gauges', className='twelve columns', children=[
                 # get_datasets()
-                *[ daq.Gauge(id=i, label=i, min=0, max=1000, value=0, size=110, labelPosition='bottom', showCurrentValue=True, className='one column', style={'padding-left': '5%'}, ) for i in floats]
+                *[ daq.Gauge(id=i, label=i, min=0, max=1, value=0, size=110, labelPosition='bottom', showCurrentValue=True, className='one column', style={'padding-left': '5%'}, ) for i in floats]
                 ]),
             dcc.Interval(id='interval-component', interval = 1000, n_intervals=0),
             dcc.Store(id='session'),#, storage_type='session'),
@@ -77,6 +77,17 @@ def Add_Dash(server):
         # print(len(results), results)
         return results
 
+    @dash_app.callback([Output(i, 'max') for i in floats],
+                        [Input('interval-component', 'n_intervals')],
+                        [State(i, 'value') for i in floats] + [State(i, 'max') for i in floats]
+                        )
+    def update_gauges_max(n, *states):
+        # print('states: ', states)
+        values = states[:int(len(states)/2)]
+        states = states[int(len(states)/2):]
+        results = [max(values[i], states[i]) for i in range(len(states))]
+        # print(len(results), results)
+        return results
 
     # @dash_app.callback(Output('therm', 'max'),
     #                     [Input('interval-component', 'n_intervals')],
