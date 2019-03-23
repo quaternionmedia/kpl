@@ -89,6 +89,17 @@ def Add_Dash(server):
         # print(len(results), results)
         return results
 
+    @dash_app.callback([Output(i, 'min') for i in floats],
+                        [Input('interval-component', 'n_intervals')],
+                        [State(i, 'value') for i in floats] + [State(i, 'min') for i in floats]
+                        )
+    def update_gauges_min(n, *states):
+        # print('states: ', states)
+        values = states[:int(len(states)/2)]
+        states = states[int(len(states)/2):]
+        results = [min(values[i], states[i]) for i in range(len(states))]
+        # print(len(results), results)
+        return results
     # @dash_app.callback(Output('therm', 'max'),
     #                     [Input('interval-component', 'n_intervals')],
     #                     )
