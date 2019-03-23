@@ -18,9 +18,9 @@ temps = deque([{'time':None, 'speed':None}], maxlen=10)
                         # 'times': [time()] })
 
 
-floats = [ 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'lift', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll',  'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'velocity', 'vertical_speed']
+floats = [ 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll',  'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'vertical_speed']
 
-vectors = ['aerodynamic_force', 'center_of_mass', 'direction', 'drag', ]
+vectors = ['aerodynamic_force', 'center_of_mass', 'direction', 'drag', 'lift', 'velocity']
 quaternions = ['rotation']
 
 
@@ -64,16 +64,19 @@ def Add_Dash(server):
                 ]
             )
 
-
-    @dash_app.callback([Output('therm', 'value'), Output('therm', 'max')],
+    @dash_app.callback([Output(i, 'value') for i in floats],
                         [Input('interval-component', 'n_intervals')],
-                        [State('therm', 'max')])
-    def update_therm(n, m):
+                        )
+    def update_gauges(n):
         temps.append(getFlightChars(flightStats()))
-        s = temps[-1]['speed']
+        # v = temps[-1][i]
         # print('speed: ', s)
-        m = max(s, m)
-        return [s, m]
+        # m = max(v, m)
+        # print(i, v, m)
+        results = [temps[-1][t] for t in temps[-1] if t is not 'time']
+        # print(len(results), results)
+        return results
+
 
     # @dash_app.callback(Output('therm', 'max'),
     #                     [Input('interval-component', 'n_intervals')],
