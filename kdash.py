@@ -85,7 +85,7 @@ def Add_Dash(server):
         # print('states: ', states)
         values = states[:int(len(states)/2)]
         states = states[int(len(states)/2):]
-        results = [max(values[i], states[i]) for i in range(len(states))]
+        results = [max(values[i] or 0, states[i]) for i in range(len(states))]
         # print(len(results), results)
         return results
 
@@ -97,7 +97,7 @@ def Add_Dash(server):
         # print('states: ', states)
         values = states[:int(len(states)/2)]
         states = states[int(len(states)/2):]
-        results = [min(values[i], states[i]) for i in range(len(states))]
+        results = [min(values[i] or 0, states[i]) for i in range(len(states))]
         # print(len(results), results)
         return results
     # @dash_app.callback(Output('therm', 'max'),
