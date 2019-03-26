@@ -7,16 +7,19 @@ import dash_cytoscape as cyto
 
 conn = krpc.connect(name='kpl')
 vessels = []
+n = 0
 for i in conn.space_center.vessels:
     vessels.append({
-        'name': i.name,
+        'name': str(n) + i.name,
         'orbiting': i.orbit.body.name,
         'radius': i.orbit.radius,
         'mass': i.mass
         })
+    n += 1
 # pprint(vessels)
 
 bodies = []
+body_names = []
 for k, b in conn.space_center.bodies.items():
     body = {
         'name': k,
@@ -26,7 +29,15 @@ for k, b in conn.space_center.bodies.items():
     if not b.orbit: body['radius'] = 0
     else: body['radius']  = b.orbit.radius
     bodies.append(body)
+    body_names.append(k)
 # pprint(bodies)
+elements = [{'data': { 'id':i['name'], 'label': i['name'] }} for i in bodies]
+
+for n, b in enumerate(bodies):
+    if len(b['satellites']) > 0:
+        for s in b['satellites']:
+            elements[body_names.index(s)]['data']['parent'] = b['name']
+pprint(elements)
 
 app = Dash()
 style = [{'selector':'node','style':{'content': 'data(label)', 'color':'white'}}]
@@ -35,7 +46,7 @@ app.layout = html.Div([
     cyto.Cytoscape(
         id='cyto',
         layout={'name': 'circle'},
-        elements=[{'data': { 'id':i['name'], 'label': i['name'] }} for i in bodies],
+        elements=elements,
         stylesheet=style,
     )
 ])
