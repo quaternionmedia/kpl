@@ -48,10 +48,10 @@ for i in conn.space_center.vessels:
 elements = [{'data': {
                 'id':i['name'],
                 'label': i['name']},
-            'position':{
-                'x': symlog(i['position'][0]),
-                'y': symlog(i['position'][1])
-            },
+            # 'position':{
+            #     'x': symlog(i['position'][0]),
+            #     'y': symlog(i['position'][1])
+            # },
             'style': {'size': str(int(i['size']/10000))}} for i in bodies]
 pprint(elements)
 
@@ -65,17 +65,20 @@ for b in bodies:
             print('making edge: ', b['name'], s)
 pprint(elements)
 
-layouts = ['preset', 'grid', 'random', 'circle', 'cose', 'concentric']
+layouts = ['preset', 'grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
 
 
 app = Dash()
 style = [{'selector':'node','style':{'content': 'data(label)', 'color':'white'}}]
 app.layout = html.Div(style={'width':'100%', 'height': '100%'}, children=[
     html.H1('kmap'),
-    dcc.Dropdown(id='dropdown', options=[{'label':i, 'value': i} for i in layouts]),
+    dcc.Dropdown(id='dropdown',
+                value='cose',
+                clearable=False,
+                options=[{'label':i, 'value': i} for i in layouts]),
     cyto.Cytoscape(
         id='cyto',
-        layout={'name': 'cose', 'animate' : True},
+        layout={'name': 'cose', 'animate' : True, 'animationDuration':1000},
         elements=elements,
         stylesheet=style,
     )
@@ -83,7 +86,7 @@ app.layout = html.Div(style={'width':'100%', 'height': '100%'}, children=[
 
 @app.callback(Output('cyto', 'layout'), [Input('dropdown', 'value')])
 def update_layout(v):
-    return {'name': v, 'animate' : True}
+    return {'name': v, 'animate' : True, 'animationDuration':1000}
 
 if __name__ == '__main__':
     app.run_server(debug=True)
