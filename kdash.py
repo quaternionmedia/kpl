@@ -1,6 +1,7 @@
 import glob
 from pathlib import Path, PurePath
-from dash import Dash
+from dash import Dash, callback_context
+from dash.exceptions import PreventUpdate
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
@@ -13,10 +14,8 @@ from random import random
 from time import time
 from collections import deque
 import krpc
-temps = deque([{'time':None, 'speed':None}], maxlen=10)
-# temps = pd.DataFrame({  'temps': [0],
-                        # 'times': [time()] })
-
+from pprint import pprint
+temps = deque([], maxlen=10)
 
 floats = [ 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll',  'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'vertical_speed']
 
@@ -32,18 +31,14 @@ def Add_Dash(server):
     conn = krpc.connect(name='kdash')
     vessel = conn.space_center.active_vessel
     refframe = vessel.orbit.body.reference_frame
+    ranges = []
     def getFlightChars(x):
         j = {i: getattr(x, i) for i in floats}
         j['time'] = time()
         return j
     flightStats = conn.add_stream(vessel.flight, refframe)
-    # flightStats.add_callback(getFlightChars)
-    # flightStats.start()
-    # dash_app.css.append_css({
-    #     "external_url": "https://derp.sfo2.digitaloceanspaces.com/style.css"
-    #     })
+    temps.append(getFlightChars(flightStats()))
 
-    # Create layout
     dash_app.layout = html.Div(id='flex-container', className='flex-container', children=[
             html.Div(id='header', className='twelve columns', style= {'align': 'center', 'background-color': '#222'}, children=[
                 html.H1(className='two columns', children='KPL!'),
@@ -60,85 +55,51 @@ def Add_Dash(server):
                 *[ daq.Gauge(id=i, label=i, min=0, max=1, value=0, size=110, labelPosition='bottom', showCurrentValue=True, className='one column', style={'padding-left': '5%'}, ) for i in floats]
                 ]),
             dcc.Interval(id='interval-component', interval = 1000, n_intervals=0),
-            dcc.Store(id='session'),#, storage_type='session'),
+            dcc.Store(id='storage', storage_type='session'),
                 ]
             )
 
-    @dash_app.callback([Output(i, 'value') for i in floats],
+    @dash_app.callback(Output('storage', 'data'),
                         [Input('interval-component', 'n_intervals')],
                         )
-    def update_gauges(n):
+    def store_data(n):
+        if n is None:
+            raise PreventUpdate
         temps.append(getFlightChars(flightStats()))
-        # v = temps[-1][i]
-        # print('speed: ', s)
-        # m = max(v, m)
-        # print(i, v, m)
-        results = [temps[-1][t] for t in temps[-1] if t is not 'time']
-        # print(len(results), results)
-        return results
+        # print('updated storage', n)
+        return temps[-1]
 
-    @dash_app.callback([Output(i, 'max') for i in floats],
-                        [Input('interval-component', 'n_intervals')],
-                        [State(i, 'value') for i in floats] + [State(i, 'max') for i in floats]
-                        )
-    def update_gauges_max(n, *states):
-        # print('states: ', states)
-        values = states[:int(len(states)/2)]
-        states = states[int(len(states)/2):]
-        results = [max(values[i] or 0, states[i]) for i in range(len(states))]
-        # print(len(results), results)
-        return results
+    def update_gauge(d, prop):
+        return d[prop] or 0
 
-    @dash_app.callback([Output(i, 'min') for i in floats],
-                        [Input('interval-component', 'n_intervals')],
-                        [State(i, 'value') for i in floats] + [State(i, 'min') for i in floats]
-                        )
-    def update_gauges_min(n, *states):
-        # print('states: ', states)
-        values = states[:int(len(states)/2)]
-        states = states[int(len(states)/2):]
-        results = [min(values[i] or 0, states[i]) for i in range(len(states))]
-        # print(len(results), results)
-        return results
-    # @dash_app.callback(Output('therm', 'max'),
-    #                     [Input('interval-component', 'n_intervals')],
-    #                     )
-    # def update_therm_range(value):
-    #     print(value)
-    #     if value > 2000:
-    #         return value
+    def update_gauge_range_min(d, prop, minimum):
+        return min(d[prop] or 0, minimum)
 
+    def update_gauge_range_max(d, prop, maximum):
+        return max(d[prop] or 0, maximum)
+
+
+    for i in floats:
+        dash_app.callback(Output(i, 'min'),
+                        [Input('storage', 'data')],
+                        [State(i, 'id'),
+                        State(i, 'min')])(update_gauge_range_min)
+    for i in floats:
+        dash_app.callback(Output(i, 'max'),
+                            [Input('storage', 'data')],
+                            [State(i, 'id'),
+                            State(i, 'max')])(update_gauge_range_max)
+    for i in floats:
+        dash_app.callback(Output(i, 'value'),
+                            [Input('storage', 'data')],
+                            [State(i, 'id')])(update_gauge)
 
     @dash_app.callback(Output('exGraph', 'extendData'),
-                        [Input('interval-component', 'n_intervals')],
-                        [State('exGraph', 'figure')])
-    def update_therm_graph(n, fig):
-
+                        [Input('interval-component', 'n_intervals')])
+                        # [State('exGraph', 'figure')])
+    def update_therm_graph(n):
         return [ {  'x': [temps[-1]['time']] ,
                     'y' : [temps[-1]['speed']] } ]
 
 
     return dash_app.server
-
-
-
-
-
-
-
-#
-# def get_datasets():
-#     """Gets all CSVS in datasets directory."""
-#     data_filepath = list(p.glob('application/datasets/*.csv'))
-#     arr = []
-#     for index, csv in enumerate(data_filepath):
-#         print(PurePath(csv))
-#         df = pd.read_csv(data_filepath[index]).head(10)
-#         table_preview = dash_table.DataTable(
-#             id='table' + str(index),
-#             columns=[{"name": i, "id": i} for i in df.columns],
-#             data=df.to_dict("rows"),
-#             sorting=True,
-#         )
-#         arr.append(table_preview)
-#     return arr
