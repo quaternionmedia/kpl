@@ -3,6 +3,7 @@ dash
 dash-core-components
 dash-daq
 dash-html-components
-dash-table 
+dash-table
 dash-table-experiments
 dash-extendable-graph
+dash-cytoscape
