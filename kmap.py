@@ -14,7 +14,9 @@ def symlog(n):
     # return n/1000000000
 
 conn = krpc.connect(name='kpl')
-body_names = []
+
+def getBodyNames():
+    return list(conn.space_center.bodies.keys())
 
 def getPositions(n, refName):
     print('getting positions from', refName)
@@ -31,7 +33,7 @@ def getPositions(n, refName):
         if not b.orbit: body['radius'] = 0
         else: body['radius']  = b.orbit.radius
         bodies.append(body)
-        body_names.append(k)
+        # body_names.append(k)
     # pprint(bodies)
 
     vessels = []
@@ -68,20 +70,26 @@ def getPositions(n, refName):
                 # print('making edge: ', b['name'], s)
     for v in vessels:
         elements.append({'data':{'source': v['name'], 'target': v['orbiting']}})
-    pprint(elements)
+    # pprint(elements)
     return elements
 
 layouts = ['preset', 'grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
 
+body_names = getBodyNames()
+print('body_names', body_names)
 
 app = Dash()
-style = [{'selector':'node','style':{'content': 'data(label)', 'color':'white'}}] + [{'selector': i, 'style': {'size': int(i['size']/10)}} for i in body_names]
+style = [{'selector':'node','style':{'content': 'data(label)', 'color':'white'}}] #+ [{'selector': i, 'style': {'height': int(i['size']/100), 'width': int(i['size']/100)}} for i in body_names]
 app.layout = html.Div(style={'width':'100%', 'height': '100%'}, children=[
     html.H1('kmap'),
     dcc.Dropdown(id='dropdown',
                 value='preset',
                 clearable=False,
                 options=[{'label':i, 'value': i} for i in layouts]),
+    dcc.Dropdown(id='refframe',
+                value='Kerbin',
+                clearable=False,
+                options=[{'label':i, 'value': i} for i in body_names]),
     cyto.Cytoscape(
         id='cyto',
         layout={'name': 'preset', 'animate' : True, 'animationDuration':1000},
@@ -100,13 +108,14 @@ app.callback(Output('cyto', 'elements'),
             [Input('interval-component', 'n_intervals')],
             [State('storage', 'data')])(getPositions)
 
-@app.callback(Output('storage', 'data'), [Input('cyto', 'selectedNodeData')])
-def update_ref(sel):
+def update_ref(selectedNodes, referenceFrame):
     # print('storing ', sel)
-    if not sel: raise PreventUpdate
-    else:
-        return sel[0]['id']
+    if not selectedNodes and not referenceFrame: raise PreventUpdate
+    if selectedNodes: return selectedNodes[0]['id']
+    else: return referenceFrame
 
+app.callback(Output('storage', 'data'),
+            [Input('cyto', 'selectedNodeData'), Input('refframe', 'value')])(update_ref)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
