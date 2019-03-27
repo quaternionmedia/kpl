@@ -1,6 +1,6 @@
 import krpc
 from pprint import pprint
-from dash import Dash
+from kpl import kpl
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
@@ -13,16 +13,16 @@ def symlog(n):
     else: return sqrt(sqrt(n))
     # return n/1000000000
 
-conn = krpc.connect(name='kpl')
+# conn = krpc.connect(name='kpl')
 
 def getBodyNames():
-    return list(conn.space_center.bodies.keys())
+    return list(kpl.conn.space_center.bodies.keys())
 
 def getPositions(n, refName):
     print('getting positions from', refName)
-    refframe = conn.space_center.bodies[refName].reference_frame
+    refframe = kpl.conn.space_center.bodies[refName].reference_frame
     bodies = []
-    for k, b in conn.space_center.bodies.items():
+    for k, b in kpl.conn.space_center.bodies.items():
         body = {
             'name': k,
             'satellites': [s.name for s in b.satellites],
@@ -38,7 +38,7 @@ def getPositions(n, refName):
 
     vessels = []
     n = 0
-    for i in conn.space_center.vessels:
+    for i in kpl.conn.space_center.vessels:
         vessels.append({
             'name': str(n) + i.name,
             'orbiting': i.orbit.body.name,
@@ -78,9 +78,9 @@ layouts = ['preset', 'grid', 'random', 'circle', 'cose', 'concentric', 'breadthf
 body_names = getBodyNames()
 print('body_names', body_names)
 
-app = Dash()
+#app = Dash()
 style = [{'selector':'node','style':{'content': 'data(label)', 'color':'white'}}] #+ [{'selector': i, 'style': {'height': int(i['size']/100), 'width': int(i['size']/100)}} for i in body_names]
-app.layout = html.Div(style={'width':'100%', 'height': '100%'}, children=[
+layout = html.Div(style={'width':'100%', 'height': '100%'}, children=[
     html.H1('kmap'),
     dcc.Dropdown(id='dropdown',
                 value='preset',
@@ -96,17 +96,17 @@ app.layout = html.Div(style={'width':'100%', 'height': '100%'}, children=[
         elements=getPositions(0, 'Sun'),
         stylesheet=style,
     ),
-    dcc.Interval(id='interval-component', interval = 3000, n_intervals=0),
-    dcc.Store(id='storage', storage_type='session', data='Kerbin'),
+    dcc.Interval(id='kmap-interval', interval = 3000, n_intervals=0),
+    dcc.Store(id='kmap-storage', storage_type='session', data='Kerbin'),
 ], )
 
-@app.callback(Output('cyto', 'layout'), [Input('dropdown', 'value')])
+@kpl.callback(Output('cyto', 'layout'), [Input('dropdown', 'value')])
 def update_layout(v):
     return {'name': v, 'animate' : True, 'animationDuration':1000}
 
-app.callback(Output('cyto', 'elements'),
-            [Input('interval-component', 'n_intervals')],
-            [State('storage', 'data')])(getPositions)
+kpl.callback(Output('cyto', 'elements'),
+            [Input('kmap-interval', 'n_intervals')],
+            [State('kmap-storage', 'data')])(getPositions)
 
 def update_ref(selectedNodes, referenceFrame):
     # print('storing ', sel)
@@ -114,8 +114,9 @@ def update_ref(selectedNodes, referenceFrame):
     if selectedNodes: return selectedNodes[0]['id']
     else: return referenceFrame
 
-app.callback(Output('storage', 'data'),
+kpl.callback(Output('kmap-storage', 'data'),
             [Input('cyto', 'selectedNodeData'), Input('refframe', 'value')])(update_ref)
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    kpl.layout = layout
+    kpl.run_server(host='0.0.0.0', port=8888, debug=True)
