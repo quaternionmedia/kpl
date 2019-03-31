@@ -7,3 +7,4 @@ dash-table
 dash-table-experiments
 dash-extendable-graph
 dash-cytoscape
+dash-smoothie
