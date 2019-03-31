@@ -7,76 +7,21 @@ import dash_html_components as html
 from dash.exceptions import PreventUpdate
 import dash_cytoscape as cyto
 from math import sqrt
-
-def symlog(n):
-    if n < 0: return -sqrt(sqrt(-n))
-    else: return sqrt(sqrt(n))
-    # return n/1000000000
-
-# conn = krpc.connect(name='kpl')
-
-def getBodyNames():
-    return list(kpl.conn.space_center.bodies.keys())
-
-def getPositions(n, refName):
-    print('getting positions from', refName)
-    refframe = kpl.conn.space_center.bodies[refName].reference_frame
-    bodies = []
-    for k, b in kpl.conn.space_center.bodies.items():
-        body = {
-            'name': k,
-            'satellites': [s.name for s in b.satellites],
-            'mass': b.mass,
-            'position': b.position(refframe),
-            'size': b.equatorial_radius,
-            }
-        if not b.orbit: body['radius'] = 0
-        else: body['radius']  = b.orbit.radius
-        bodies.append(body)
-        # body_names.append(k)
-    # pprint(bodies)
-
-    vessels = []
-    n = 0
-    for i in kpl.conn.space_center.vessels:
-        vessels.append({
-            'name': str(n) + i.name,
-            'orbiting': i.orbit.body.name,
-            'radius': i.orbit.radius,
-            'position': i.position(refframe),
-            'mass': i.mass,
-            'satellites': '',
-            })
-        n += 1
-    # pprint(vessels)
-
-
-    elements = [ { 'data': {
-                    'id':i['name'],
-                    'label': i['name']},
-                'position':{
-                    'x': int(2*symlog(i['position'][0])),
-                    'y': int(2*symlog(i['position'][2]))
-                },} for i in bodies+vessels]
-    # pprint(elements)
-
-    for b in bodies:
-        if len(b['satellites']) > 0:
-            for s in b['satellites']:
-                # optional add parents for each satellite
-                # elements[body_names.index(s)]['data']['parent'] = b['name']
-                # add edge from body to satellite
-                elements.append({'data':{'source': b['name'], 'target': s}})
-                # print('making edge: ', b['name'], s)
-    for v in vessels:
-        elements.append({'data':{'source': v['name'], 'target': v['orbiting']}})
-    # pprint(elements)
-    return elements
+from dash_smoothie import Smoothie
+import kerbal
 
 layouts = ['preset', 'grid', 'random', 'circle', 'cose', 'concentric', 'breadthfirst']
 
-body_names = getBodyNames()
+body_names = kerbal.getBodyNames()
 print('body_names', body_names)
+
+graphs = []
+for i in kerbal.vectors:
+    graphs.append(html.H2(i))
+    graphs.append(Smoothie(id=i, label=i, millisPerPixel=30,  axisProps=[
+        {'name': 'x', 'r': 255},
+        {'name': 'y', 'g': 255},
+        {'name': 'z', 'b': 255}]))
 
 #app = Dash()
 style = [{'selector':'node','style':{'content': 'data(label)', 'color':'white'}}] #+ [{'selector': i, 'style': {'height': int(i['size']/100), 'width': int(i['size']/100)}} for i in body_names]
@@ -93,12 +38,24 @@ layout = html.Div(style={'width':'100%', 'height': '100%'}, children=[
     cyto.Cytoscape(
         id='cyto',
         layout={'name': 'preset', 'animate' : True, 'animationDuration':1000},
-        elements=getPositions(0, 'Sun'),
+        elements=kerbal.getPositions(0, 'Sun'),
         stylesheet=style,
     ),
+    *graphs,
     dcc.Interval(id='kmap-interval', interval = 3000, n_intervals=0),
+    dcc.Interval(id='kmap-interval2', interval = 300, n_intervals=0),
+
     dcc.Store(id='kmap-storage', storage_type='session', data='Kerbin'),
 ], )
+
+def update_smoothie(n, id):
+    results = kerbal.getStats()[id]
+    print(id, results)
+    return [*results]
+
+for v in kerbal.vectors:
+    kpl.callback(Output(v, 'extendData'), [Input('kmap-interval2', 'n_intervals')], [State(v, 'id')])(update_smoothie)
+
 
 @kpl.callback(Output('cyto', 'layout'), [Input('dropdown', 'value')])
 def update_layout(v):
@@ -106,7 +63,7 @@ def update_layout(v):
 
 kpl.callback(Output('cyto', 'elements'),
             [Input('kmap-interval', 'n_intervals')],
-            [State('kmap-storage', 'data')])(getPositions)
+            [State('kmap-storage', 'data')])(kerbal.getPositions)
 
 def update_ref(selectedNodes, referenceFrame):
     # print('storing ', sel)

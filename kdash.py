@@ -9,28 +9,9 @@ from collections import deque
 from kpl import kpl
 from pprint import pprint
 from math import floor
+
 stats = deque([], maxlen=10)
-
-floats = [ 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll',  'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'vertical_speed']
-
-vectors = ['aerodynamic_force', 'center_of_mass', 'direction', 'drag', 'lift', 'velocity']
-quaternions = ['rotation']
-
-
-# def Add_Dash(server):
-    # dash_app = Dash(server=server, url_base_pathname='/kdash/')
-
-# conn = krpc.connect(name='kdash')
-vessel = kpl.conn.space_center.active_vessel
-refframe = vessel.orbit.body.reference_frame
-ranges = []
-def getFlightChars(x):
-    j = {i: round(getattr(x, i), 2) for i in floats}
-    j['time'] = round(time(), 2)
-    return j
-flightStats = kpl.conn.add_stream(vessel.flight, refframe)
-stats.append(getFlightChars(flightStats()))
-print('init stats with:', stats[-1])
+stats.append(kerbal.getFlightChars(kerbal.flightStats()))
 
 layout = html.Div(id='flex-container', className='flex-container', children=[
         html.Div(id='header', className='twelve columns', style= {'align': 'center', 'background-color': '#222'}, children=[
@@ -57,7 +38,7 @@ layout = html.Div(id='flex-container', className='flex-container', children=[
                     )
 def store_data(n):
     if not n: raise PreventUpdate
-    stats.append(getFlightChars(flightStats()))
+    stats.append(kerbal.getFlightChars(kerbal.flightStats()))
     # print('updated storage', stats[-1])
     return stats[-1]
 
