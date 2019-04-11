@@ -14,11 +14,13 @@
     <div id='chart'></div>
     <script>
     var smooth, chart;
-    var options = {responsive: true, millisPerPixel:50}
+    var options = { responsive: true,
+                    millisPerPixel:80,
+                    tooltip: true,}
     var canvas = document.getElementById('canvas');
     var chartLoaded = false;
-    var wsuri = "ws://" + window.location.hostname + ":7777/ws";
-    var connection;
+    var wsurl = "ws://" + window.location.hostname + ":" + window.location.port + "/krpc";
+    var socket;
     var newX = [];
     var newY = [];
     var newZ = [];
@@ -29,19 +31,18 @@
     let average = (array) => array.reduce((a, b) => a + b, 0) / array.length;
 
 
-    function connectToCrossbar() {
-      connection = new autobahn.Connection({
-        url: wsuri,
-        realm: "realm1"
-      }
-    );
-    connection.onopen = function (session, details) {
-      console.log("Connected: ", details);
-      session.subscribe('local.krpc.position', updatePosition);
-    }
-    connection.open();
+    function connectToWebsocket() {
+      socket = new WebSocket(wsurl);
+      socket.addEventListener('open', function (event) {
+        socket.send('Hello Server!');
+      });
 
-  }
+      socket.addEventListener('message', function (event) {
+        console.log('Message from server ', event.data);
+        updatePosition(JSON.parse(event.data));
+      });
+    }
+  connectToWebsocket();
   var posX = new TimeSeries();
   var posY = new TimeSeries();
   var posZ = new TimeSeries();
@@ -56,47 +57,14 @@
     smooth.streamTo(document.getElementById("canvas"), 500);
 
     console.log('creating chart!');
-
-    chart = c3.generate({
-      data: {
-        x: 't',
-        //        xFormat: '%Y%m%d', // 'xFormat' can be used as custom format of 'x'
-        columns: [
-          ['t'],
-          ['x'],
-          ['y'],
-          ['z'],
-          //            ['x', '20130101', '20130102', '20130103', '20130104', '20130105', '20130106'],
-          // ['data1', 30, 200, 100, 400, 150, 250],
-          // ['data2', 130, 340, 200, 500, 250, 350]
-        ],
-        colors: {
-          x: '#ff0000',
-          y: '#00ff00',
-          z: '#0000ff',
-        },
-      },
-      axis: {
-        x: {
-          // min: t0,
-          type: 'timeseries',
-          // zoom: {
-          //   type: 'scroll',
-          //   rescale: false
-          // }            // tick: {
-          //     format: '%Y-%m-%d'
-          // }
-        }
-      },
-
-    });
     chartLoaded = true;
 
   }
 
   function updatePosition(pos) {
     if (chartLoaded) {
-      var p = pos[0];
+      console.log("updating position", pos[0]);
+      var p = pos["pos"];
       t = new Date().getTime();
       // console.log("new position! ", p);
       posX.append(t, p[0]);
@@ -114,35 +82,6 @@
     smooth.options['millisPerPixel']=input1.value;
 
   }
-
-  function updateData() {
-    console.log('flowing ', newT[0], newX[0], newY[0], newZ[0]);
-    chart.flow({columns:[
-      ['t', newT[0]], // Math.floor(newT.length/2)]],
-      ['x', newX[0]], //average(newX)],
-      ['y', newY[0]],
-      ['z', newZ[0]]
-    ],
-
-    length : chartLength++ < chartMax ? 0 : 1,
-    // axis: { x : oldT[0]},
-  }
-);
-// chart.axis.min({ x : oldT[0]});
-// newData = [[], [], [], []];
-
-oldT.push(newT[0]);
-if (oldT.length >= chartMax) {
-  console.log('shifting oldT', oldT.length, oldT);
-  oldT.shift();
-}
-newX = [];
-newY = [];
-newZ = [];
-newT = [];
-}
-connectToCrossbar();
-setInterval(updateData, 1000);
 
 
 </script>
