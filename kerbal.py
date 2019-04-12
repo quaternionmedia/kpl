@@ -117,8 +117,47 @@ class Orbit(BaseModel):
     time_to_soi_change: float
     true_anomaly: float
 
-# class Control(BaseModel):
-#
+class Control(BaseModel):
+    abort: bool
+    add_node: float
+    antennas: bool
+    brakes: bool
+    cargo_bays: bool
+    current_stage: int
+    forward: float
+    gear: bool
+    get_action_group: float
+    input_mode: float
+    intakes: bool
+    legs: bool
+    lights: bool
+    nodes: float
+    parachutes: bool
+    pitch: float
+    radiators: bool
+    rcs: bool
+    reaction_wheels: bool
+    remove_nodes: float
+    resource_harvesters: bool
+    resource_harvesters_active: bool
+    right: float
+    roll: float
+    sas: bool
+    # sas_mode: SASMode
+    set_action_group: float
+    solar_panels: bool
+    # source: ControlSource
+    # speed_mode: SpeedMode
+    # state: ControlState
+    throttle: float
+    toggle_action_group: float
+    up: float
+    wheel_steering: float
+    wheel_throttle: float
+    wheels: bool
+    yaw: float
+    # nodes: List[Nodes]
+
 # class Comms(BaseModel):
 #
 # class AutoPilot(BaseModel):
