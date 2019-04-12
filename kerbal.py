@@ -1,11 +1,133 @@
 from kpl import kpl
+import krpc
 from math import sqrt
 from time import time
+from pydantic import BaseModel
+from typing import List, Tuple
 
 floats = [ 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll',  'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'vertical_speed']
-
 vectors = ['aerodynamic_force', 'center_of_mass', 'direction', 'drag', 'lift', 'velocity']
 quaternions = ['rotation']
+
+class Flight(BaseModel):
+    angle_of_attack: float
+    atmosphere_density: float
+    bedrock_altitude: float
+    dynamic_pressure: float
+    elevation: float
+    equivalent_air_speed: float
+    g_force: float
+    heading: float
+    horizontal_speed: float
+    latitude: float
+    longitude: float
+    mach: float
+    mean_altitude: float
+    pitch: float
+    roll: float
+    sideslip_angle: float
+    speed: float
+    speed_of_sound: float
+    static_air_temperature: float
+    static_pressure: float
+    static_pressure_at_msl: float
+    surface_altitude: float
+    terminal_velocity: float
+    total_air_temperature: float
+    true_air_speed: float
+    vertical_speed: float
+    aerodynamic_force: Tuple[float]
+    center_of_mass: Tuple[float]
+    direction: Tuple[float]
+    drag: Tuple[float]
+    lift: Tuple[float]
+    velocity: Tuple[float]
+    rotation: Tuple[float] # quaternion
+
+class Vessel(BaseModel):
+    angular_velocity: Tuple[float]
+    auto_pilot: float
+    available_control_surface_torque: Tuple[Tuple[float]]
+    available_engine_torque: Tuple[Tuple[float]]
+    available_other_torque: Tuple[Tuple[float]]
+    available_rcs_torque: Tuple[Tuple[float]]
+    available_reaction_wheel_torque: Tuple[Tuple[float]]
+    available_thrust: float
+    available_torque: Tuple[Tuple[float]]
+    biome: str
+    bounding_box: Tuple[Tuple[float]]
+    comms: float
+    control: float
+    # crew: List[krpc.SpaceCenter.CrewMember]
+    crew_capacity: int
+    crew_count: int
+    direction: Tuple[float]
+    dry_mass: float
+    inertia_tensor: List[float]
+    kerbin_sea_level_specific_impulse: float
+    mass: float
+    max_thrust: float
+    max_vacuum_thrust: float
+    met: float # mission elapsed time
+    moment_of_inertia: Tuple[float]
+    name: str
+    # orbital_reference_frame:
+    # parts: float
+    position: Tuple[float]
+    recoverable: bool
+    # reference_frame:
+    # resources: List[krpc.Resources]
+    rotation: Tuple[float] # quaternion
+    # situation: krpc.VesselSituation
+    specific_impulse: float
+    # surface_reference_frame:
+    # surface_velocity_reference_frame:
+    thrust: float
+    # type: krpc.VesselType
+    vacuum_specific_impulse: float
+    velocity: Tuple[float]
+
+class Orbit(BaseModel):
+    apoapsis: float
+    apoapsis_altitude: float
+    argument_of_periapsis: float
+    # body: krpc.CelestialBody
+    eccentric_anomaly: float
+    eccentricity: float
+    epoch: float
+    inclination: float
+    # list_closest_approaches: List(List(float))
+    longitude_of_ascending_node: float
+    mean_anomaly: float
+    # next_orbit: krpc.Orbit
+    orbital_speed: float
+    periapsis: float
+    periapsis_altitude: float
+    period: float
+    radius: float
+    reference_plane_direction: float
+    reference_plane_normal: float
+    relative_inclination: float
+    semi_major_axis: float
+    semi_minor_axis: float
+    speed: float
+    time_of_closest_approach: float
+    time_to_apoapsis: float
+    time_to_periapsis: float
+    time_to_soi_change: float
+    true_anomaly: float
+
+# class Control(BaseModel):
+#
+# class Comms(BaseModel):
+#
+# class AutoPilot(BaseModel):
+#
+# class CrewMember(BaseModel):
+#
+# class CrewMemberType(BaseModel):
+
+
 vessel = kpl.conn.space_center.active_vessel
 refframe = vessel.orbit.body.reference_frame
 ranges = []
