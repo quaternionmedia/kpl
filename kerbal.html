@@ -2,28 +2,30 @@
 <meta charset="utf-8">
 
 <script src="deps/smoothie.js"></script>
-<script src="deps/autobahn.js"></script>
 
-<link href="deps/c3.css" rel="stylesheet">
-<script src="deps/d3.js" charset="utf-8"></script>
-<script src="deps/c3.js"></script>
 <body onload="createTimeline()">
-  <div id="posText"></div>
   <canvas id="canvas" style="width:100%; height:200px"></canvas>
   <div class="control"><label class="slider" for="input1">Scroll speed</label><input id="input1" type="range" min="1" max="100" oninput="updateScroll()"></div>
-  <div class='chart'>
-    <div id='chart'></div>
+  <input id="shInput"><button onclick="sendText()">sh</button>
+  <div id="shText"></div>
     <script>
     var smooth, chart;
     var options = { responsive: true,
                     millisPerPixel:80,
                     tooltip: true,}
     var canvas = document.getElementById('canvas');
-    var posText = document.getElementById('posText');
-
+    var shText = document.getElementById('shText');
+    var shInput = document.getElementById('shInput');
+    const reader = new FileReader();
+    reader.addEventListener('loadend', (e) => {
+      const text = e.srcElement.result;
+      console.log(text);
+        shText.innerHTML = text;
+    });
     var chartLoaded = false;
-    var wsurl = "ws://" + window.location.hostname + ":" + window.location.port + "/krpc";
+    var wsurl = "ws://" + window.location.hostname + ":" + window.location.port;
     var socket;
+    var shSocket;
     var newX = [];
     var newY = [];
     var newZ = [];
@@ -35,18 +37,27 @@
 
 
     function connectToWebsocket() {
-      socket = new WebSocket(wsurl);
+      socket = new WebSocket(wsurl + '/krpc');
       socket.addEventListener('open', function (event) {
         socket.send('Hello Server!');
       });
 
       socket.addEventListener('message', function (event) {
-        console.log('Message from server ', event.data);
+        // console.log('Message from server ', event.data);
         updatePosition(JSON.parse(event.data));
-        posText.innerHTML = event.data;
       });
+      shSocket = new WebSocket(wsurl + '/wrap');
+      shSocket.addEventListener('message', function (event) {
+        console.log('new sh message', event.data);
+      reader.readAsText(event.data);
+});
     }
   connectToWebsocket();
+
+  function sendText() {
+    console.log("sending value to server", shInput.value);
+    shSocket.send(shInput.value);
+  }
   var posX = new TimeSeries();
   var posY = new TimeSeries();
   var posZ = new TimeSeries();
@@ -67,7 +78,7 @@
 
   function updatePosition(pos) {
     if (chartLoaded) {
-      console.log("updating position", pos[0]);
+      // console.log("updating position", pos[0]);
       var p = pos["pos"];
       t = new Date().getTime();
       // console.log("new position! ", p);

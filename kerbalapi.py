@@ -9,8 +9,8 @@ from starlette.templating import Jinja2Templates
 # from starlette.endpoints import WebSocketEndpoint
 from starlette.websockets import WebSocket
 from asyncio import sleep
-
-
+from wrap import wrap
+from dill import dumps
 import uvicorn
 
 
@@ -48,6 +48,18 @@ async def ws(websocket: WebSocket):
         # data = await websocket.receive_text()
         await websocket.send_json({'pos': pos()})
         await sleep(.2)
+    await websocket.close()
+
+@app.websocket_route('/wrap')
+async def wrapper(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        for i in wrap(data):
+            await websocket.send_bytes(dumps(i))
+            print('sent: ', i)
+            await sleep(.1)
+
     await websocket.close()
 
 def render_template(path, **kwargs):
