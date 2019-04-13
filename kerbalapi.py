@@ -14,7 +14,7 @@ from asyncio import sleep
 import uvicorn
 
 
-conn = krpc.connect(name='george')
+conn = krpc.connect(name='george', address='192.168.1.6')
 vessel = conn.space_center.active_vessel
 refframe = vessel.orbit.body.reference_frame
 

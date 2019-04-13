@@ -8,6 +8,7 @@
 <script src="deps/d3.js" charset="utf-8"></script>
 <script src="deps/c3.js"></script>
 <body onload="createTimeline()">
+  <div id="posText"></div>
   <canvas id="canvas" style="width:100%; height:200px"></canvas>
   <div class="control"><label class="slider" for="input1">Scroll speed</label><input id="input1" type="range" min="1" max="100" oninput="updateScroll()"></div>
   <div class='chart'>
@@ -18,6 +19,8 @@
                     millisPerPixel:80,
                     tooltip: true,}
     var canvas = document.getElementById('canvas');
+    var posText = document.getElementById('posText');
+
     var chartLoaded = false;
     var wsurl = "ws://" + window.location.hostname + ":" + window.location.port + "/krpc";
     var socket;
@@ -40,6 +43,7 @@
       socket.addEventListener('message', function (event) {
         console.log('Message from server ', event.data);
         updatePosition(JSON.parse(event.data));
+        posText.innerHTML = event.data;
       });
     }
   connectToWebsocket();
