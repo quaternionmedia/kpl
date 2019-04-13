@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-
+<style>
+code {outline: 1px solid #ccc; padding: 5px; margin: 5px;
+  white-space: pre-line;}
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }
+</style>
 <script src="deps/smoothie.js"></script>
 
 <body onload="createTimeline()">
@@ -35,6 +43,29 @@
     var chartMax = 100;
     let average = (array) => array.reduce((a, b) => a + b, 0) / array.length;
 
+    function syntaxHighlight(json) {
+        json = JSON.parse(json);      console.log('highlighting', typeof json);
+        if (typeof json != 'string') {
+             json = JSON.stringify(json, null, 4);
+        }
+
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/, /g, ', \n');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+            var cls = 'number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'key';
+                } else {
+                    cls = 'string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
 
     function connectToWebsocket() {
       socket = new WebSocket(wsurl + '/krpc');
@@ -48,8 +79,10 @@
       });
       shSocket = new WebSocket(wsurl + '/wrap');
       shSocket.addEventListener('message', function (event) {
-        console.log('new sh message', event.data);
-      reader.readAsText(event.data);
+        // console.log('new sh message', event.data);
+      // reader.readAsText(event.data);
+      shText.innerHTML = '';
+      shText.appendChild(document.createElement('code')).innerHTML = syntaxHighlight(JSON.parse(event.data));
 });
     }
   connectToWebsocket();

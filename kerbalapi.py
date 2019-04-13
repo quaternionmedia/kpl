@@ -10,11 +10,11 @@ from starlette.templating import Jinja2Templates
 from starlette.websockets import WebSocket
 from asyncio import sleep
 from wrap import wrap
-from dill import dumps
+from json import dumps
 import uvicorn
 
 
-conn = krpc.connect(name='george', address='192.168.1.6')
+conn = krpc.connect(name='george', address='127.0.0.1')
 vessel = conn.space_center.active_vessel
 refframe = vessel.orbit.body.reference_frame
 
@@ -56,9 +56,10 @@ async def wrapper(websocket: WebSocket):
     while True:
         data = await websocket.receive_text()
         for i in wrap(data):
-            await websocket.send_bytes(dumps(i))
-            print('sent: ', i)
-            await sleep(.1)
+            results = dumps(str(i))
+            await websocket.send_json(results)
+            # print('sent: ', results)
+            await sleep(.01)
 
     await websocket.close()
 
