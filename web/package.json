@@ -1,0 +1,19 @@
+{
+  "name": "kpl",
+  "version": "0.0.2",
+  "description": "Kerbal Propulsion Laboratory",
+  "repository": "https://github.com/quaternionmedia/kpl",
+  "author": "Quaternion Media",
+  "license": "MIT",
+  "private": false,
+  "browserslist": [
+    "defaults"
+  ],
+  "dependencies": {
+    "alertifyjs": "^1.13.1",
+    "mithril": "^2.0.4"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0-beta.1"
+  }
+}
