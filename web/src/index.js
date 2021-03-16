@@ -1,6 +1,6 @@
 import m from 'mithril'
 import { Layout } from './Menu'
-
+import './style.css'
 
 export function Home() {
   return {

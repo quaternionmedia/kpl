@@ -1,0 +1,46 @@
+body {
+  background: #222;
+  color: #ddd;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+
+}
+.layout {
+  margin: 1em auto;
+}
+
+.menu {
+  display: flex;
+  justify-content: space-between;
+  margin: 1em 1em .5em;
+  padding: .5em 1em;
+  background: #8883;
+} 
+
+.button {
+  display: inline-flex;
+  /* background-color: #d652bb; */
+}
+.logo {
+  width: 4em;
+}
+i {
+  border-style: solid;
+  border-color: #393939;
+  border-radius: 10px;
+  padding: 6px;
+  margin: 2px;
+  width: 1em;
+  height: 1em;
+  text-align: center;
+  font-style: normal;
+}
+i:hover {
+  background-color: #393939;
+}
+i:active {
+  animation: blinker .2s 1;
+}
