@@ -1,3 +1,4 @@
 krpc
 fastapi
 aiofiles
+orjson
