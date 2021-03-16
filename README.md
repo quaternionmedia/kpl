@@ -14,7 +14,7 @@ Because Kerbal needs more than one screen!
 ## build
 Build the web files
 
-`./ksp.sh build`
+`./kpl.sh build`
 
 ## run
 Wtih Kerbal and krpc running:
