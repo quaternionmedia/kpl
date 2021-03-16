@@ -1,0 +1,5 @@
+flight_chars = ['aerodynamic_force', 'angle_of_attack',  'atmosphere_density', 'bedrock_altitude', 'center_of_mass', 'direction', 'drag', 'dynamic_pressure', 'elevation', 'equivalent_air_speed', 'g_force', 'heading', 'horizontal_speed', 'latitude', 'lift', 'longitude', 'mach', 'mean_altitude', 'pitch', 'roll', 'rotation', 'sideslip_angle', 'speed', 'speed_of_sound',  'static_air_temperature', 'static_pressure', 'static_pressure_at_msl', 'surface_altitude', 'terminal_velocity',  'total_air_temperature', 'true_air_speed', 'velocity', 'vertical_speed']
+
+# broken = ['ballistic_coefficient', 'drag_coefficient', 'lift_coefficient',  'reynolds_number','stall_fraction', 'thrust_specific_fuel_consumption','simulate_aerodynamic_force_at',]
+
+# redundant = ['normal', 'anti_normal', 'prograde', 'radial', 'retrograde', 'anti_radial']

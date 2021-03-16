@@ -15,3 +15,4 @@ $` kpl`
 
 Then visit [localhost:8888](http://localhost:8888)
 
+or [localhost:8888](http://localhost:8888/stats)
