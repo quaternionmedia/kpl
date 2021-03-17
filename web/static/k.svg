@@ -8,8 +8,8 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.0"
-   width="59.513958"
-   height="57.083794"
+   width="65.402298"
+   height="56.968266"
    id="svg2"
    sodipodi:docname="k.svg"
    inkscape:version="1.0.2 (1.0.2+r75+1)">
@@ -27,40 +27,46 @@
      id="namedview1196"
      showgrid="false"
      inkscape:pagecheckerboard="true"
-     showguides="true"
+     showguides="false"
      inkscape:guide-bbox="true"
-     inkscape:zoom="1.8885424"
-     inkscape:cx="95.550477"
-     inkscape:cy="7.8849733"
+     inkscape:zoom="2.6708023"
+     inkscape:cx="42.811487"
+     inkscape:cy="-22.330434"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg2"
+     inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
-     fit-margin-bottom="0">
+     fit-margin-bottom="0"
+     inkscape:showpageshadow="true"
+     showborder="true">
     <sodipodi:guide
-       position="-3.8112888,102.23693"
+       position="-3.0096082,-39.120032"
        orientation="1,0"
        id="guide1198" />
     <sodipodi:guide
-       position="24.252682,127.38861"
+       position="25.054362,-13.968355"
        orientation="0,-1"
        id="guide1200" />
     <sodipodi:guide
-       position="33.916219,70.466399"
+       position="34.717902,-70.890566"
        orientation="0,-1"
        id="guide1202" />
     <sodipodi:guide
-       position="52.316654,95.220941"
+       position="53.118336,-46.136025"
        orientation="1,0"
        id="guide1204" />
     <sodipodi:guide
-       position="52.316654,98.993692"
+       position="53.118336,-42.363274"
        orientation="0,-1"
        id="guide1209" />
+    <sodipodi:guide
+       position="90.017766,29.796874"
+       orientation="0,-1"
+       id="guide849" />
   </sodipodi:namedview>
   <defs
      id="defs124" />
@@ -76,19 +82,21 @@
       </cc:Work>
     </rdf:RDF>
   </metadata>
-  <path
-     d="m 0.01518373,57.083794 c 0,0 -0.02105,-26.33691 -0.01358,-37.191053 l 0.01358,-19.73115139 H 9.3265124 18.63784 V 23.530473 c 0,22.774551 -0.0359,33.553321 -0.0359,33.553321 z"
-     id="path3203"
-     style="fill:#ff0000;fill-opacity:1"
-     sodipodi:nodetypes="cscccscc" />
-  <path
-     d="M 59.388918,0.24056861 C 55.760414,4.7253416 36.058612,23.335183 36.398503,28.556507 37.702645,33.351644 51.23584,46.612914 59.513957,57.083794 H 36.641491 c 0,0 -15.421279,-20.25119 -16.494039,-22.66521 -1.254123,-3.4134 -1.345882,-7.112147 -0.776599,-10.079027 0.998641,-5.204513 11.879145,-17.1589844 18.328203,-24.17796739 0.311405,-0.405018 21.689862,0.07898 21.689862,0.07898 z"
-     id="path1206"
-     style="fill:#ff0000;fill-opacity:1"
-     sodipodi:nodetypes="cccccscc" />
   <g
      inkscape:groupmode="layer"
      id="layer1"
      inkscape:label="Layer 1"
-     transform="translate(-7.5178512,-71.628584)" />
+     transform="translate(-6.7161682,-73.303345)"
+     style="display:inline">
+    <path
+       d="m 6.7313805,130.22555 c 0,0 -0.0211,-26.33691 -0.0136,-37.191054 l 0.0136,-19.731151 h 9.3113295 9.31133 v 23.368883 c 0,22.774552 -0.0359,33.553322 -0.0359,33.553322 z"
+       id="path3203"
+       style="fill:#ff0000;fill-opacity:1"
+       sodipodi:nodetypes="cscccscc" />
+    <path
+       d="m 72.118466,73.550293 c -3.971987,4.083951 -23.317401,23.038735 -23.031936,28.508017 0.490883,5.53594 14.690301,17.71782 22.968418,28.1887 l -27.447777,0.0246 c 0,0 -15.189291,-19.82816 -16.903954,-24.73183 -1.25412,-3.4134 -0.826934,-4.80775 -0.257654,-7.77463 0.99864,-5.204513 11.874907,-17.250943 18.323967,-24.269926 z"
+       id="path1206"
+       style="fill:#ff0000;fill-opacity:1"
+       sodipodi:nodetypes="cccccscc" />
+  </g>
 </svg>
