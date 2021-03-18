@@ -1,5 +1,6 @@
 import m from 'mithril'
 import { Layout } from './Menu'
+import { Smoothie } from './Components'
 import './style.css'
 
 export function Home() {
@@ -25,9 +26,18 @@ export function Stats() {
   }
 }
 
+export function Flight() {
+  return {
+    view: vnode => {
+      return m(Smoothie)
+    }
+  }
+}
+
 console.log('kpl started!')
 
 m.route(document.body, '/', {
   '/': { render: () => m(Layout, m(Home))},
+  '/flight': { render: () => m(Layout, m(Flight))},
   '/stats': { render: () => m(Layout, m(Stats))},
 })

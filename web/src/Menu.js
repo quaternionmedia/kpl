@@ -15,7 +15,8 @@ export function Links() {
   return {
     view: vnode => {
       return [
-        m(Link, {href:'/stats', id: 'connectLink'}, 'stats'),
+        m(Link, {href:'/flight', id: 'flightLink'}, 'flight'),
+        m(Link, {href:'/stats', id: 'statsLink'}, 'stats'),
       ]
     }
   }
