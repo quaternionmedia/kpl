@@ -1,6 +1,6 @@
 import m from 'mithril'
 import { Layout } from './Menu'
-import { Smoothie } from './Components'
+import { Smoothie } from './Smoothie'
 import './style.css'
 
 export function Home() {
