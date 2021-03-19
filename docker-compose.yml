@@ -24,3 +24,11 @@ services:
     networks:
       - kpl
       - falcon
+    depends_on:
+      - rabbit
+  rabbit:
+    image: rabbitmq:alpine
+    networks:
+      - kpl
+    ports:
+      - 5672:5672

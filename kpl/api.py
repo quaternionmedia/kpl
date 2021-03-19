@@ -1,9 +1,10 @@
+import krpc
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 from kpl.responses import ORJSONResponse
 from kpl.constants import flight_chars
+from pika import BlockingConnection, ConnectionParameters
 
-import krpc
 
 def getAll(obj):
     # return {attr: getattr(obj, attr) for attr in flight_chars}
@@ -14,22 +15,34 @@ def getAll(obj):
         except Exception as e:
             print('error converting', attr, e)
     return res
-conn = krpc.connect(
-            name='kpl',
-            address='127.0.0.1',
-            rpc_port=50000, stream_port=50001)
-print(conn.krpc.get_status().version)
-vessel = conn.space_center.active_vessel
 
-app = FastAPI()
+class Ksp:
+    def __init__(self, name='kpl',
+                address='172.17.0.1',
+                rpc_port=50000,
+                stream_port=50001):
+        self.connection = BlockingConnection(ConnectionParameters('rabbit'))
+        self.channel = self.connection.channel()
+
+        self.conn = krpc.connect(
+            name=name,
+            # address='192.168.1901.130',
+            address=address,
+            rpc_port=rpc_port, stream_port=stream_port)
+        print(self.conn.krpc.get_status().version)
+        self.vessel = self.conn.space_center.active_vessel
+        self.flight = self.vessel.flight()
+k = Ksp()
+
 app = FastAPI(default_response_class=ORJSONResponse)
 
 @app.get('/stats')
 def getFlighStats():
-    return getAll(vessel.flight())
+    if k.conn.krpc.current_game_scene.name == 'flight':
+        vessel = k.conn.space_center.active_vessel
+        return getAll(vessel.flight())
     
 
-
-app.mount('/static', StaticFiles(directory='web/static', html=True), name='static')
-app.mount('/', StaticFiles(directory='web/dist', html=True), name='dist')
+app.mount('/static', StaticFiles(directory='/app/static', html=True), name='static')
+app.mount('/', StaticFiles(directory='/app/dist', html=True), name='dist')
 
