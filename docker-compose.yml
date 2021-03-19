@@ -1,0 +1,26 @@
+version: '3.9'
+
+networks:
+  kpl:
+  falcon:
+    driver: bridge
+services:
+  web:
+    build: ./web/
+    image: kpl_web
+    volumes:
+      - ./web/:/app/
+    ports:
+      - 5555:5555
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: kpl_api
+    volumes:
+      - ./kpl/:/kpl/kpl
+      - ./web/dist/:/app/dist/
+      - ./web/static/:/app/static/
+    networks:
+      - kpl
+      - falcon
