@@ -1,11 +1,11 @@
 FROM python:rc-slim
 RUN pip install -U pip
 
+COPY requirements.txt /kpl/
+RUN pip install -r /kpl/requirements.txt
+
 COPY kpl /kpl/kpl
 COPY setup.py /kpl/
-COPY requirements.txt /kpl/
-
-RUN pip install -r /kpl/requirements.txt
 RUN pip install -e /kpl
 
 WORKDIR /kpl/kpl
