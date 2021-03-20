@@ -1,7 +1,9 @@
 import m from 'mithril'
 import { Layout } from './Menu'
 import { Smoothie } from './Smoothie'
+import { Subscriber } from './Subscriber'
 import './style.css'
+import { flight_chars } from './constants'
 
 export function Home() {
   return {
@@ -29,7 +31,9 @@ export function Stats() {
 export function Flight() {
   return {
     view: vnode => {
-      return m(Smoothie)
+      return flight_chars.map(char => {
+        return m(Subscriber, {name: char})
+      })
     }
   }
 }
