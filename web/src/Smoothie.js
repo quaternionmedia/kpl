@@ -2,7 +2,7 @@ import m from 'mithril'
 import { SmoothieChart, TimeSeries } from 'smoothie'
 import './smoothie.css'
 
-let opts = {
+export const opts = {
   tooltip:true,
 }
 
@@ -16,7 +16,7 @@ export function Smoothie() {
       chart.streamTo(vnode.dom, 50)
       setInterval( () => {
       series.append(Date.now(), Math.random() * 10000);
-    }, 500)
+    }, 50)
     },
     view: vnode => {
       return m('canvas', {})

@@ -44,3 +44,11 @@ i:hover {
 i:active {
   animation: blinker .2s 1;
 }
+
+.label {
+  display: table-header-group;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}

@@ -31,9 +31,14 @@ export function Stats() {
 export function Flight() {
   return {
     view: vnode => {
-      return flight_chars.map(char => {
-        return m(Subscriber, {name: char})
-      })
+      return m('.grid', {}, [
+        flight_chars.map(char => {
+          return m('.elem', {}, [
+            m('p.label', {}, char),
+            m(Subscriber, {name: char}),
+          ])
+        })
+      ])
     }
   }
 }
@@ -42,6 +47,7 @@ console.log('kpl started!')
 
 m.route(document.body, '/', {
   '/': { render: () => m(Layout, m(Home))},
+  '/test': { render: () => m(Layout, m(Smoothie))},
   '/flight': { render: () => m(Layout, m(Flight))},
   '/stats': { render: () => m(Layout, m(Stats))},
 })
