@@ -1,4 +1,4 @@
-FROM python:rc-slim
+FROM python:rc
 RUN pip install -U pip
 
 COPY requirements.txt /kpl/

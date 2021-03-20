@@ -3,5 +3,5 @@ krpc
 fastapi
 aiofiles
 orjson
-pika
 uvicorn
+autobahn

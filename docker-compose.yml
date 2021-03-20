@@ -25,14 +25,14 @@ services:
       - kpl
       - falcon
     depends_on:
-      - "rabbit"
+      - "crossbar"
     ports:
       - 8888:80
     env_file:
       - .address
-  rabbit:
-    image: rabbitmq:alpine
-    networks:
-      - kpl
+  crossbar:
+    image: crossbario/crossbar
+    volumes:
+      - ./.crossbar/:/.crossbar/
     ports:
-      - 5672:5672
+      - 8080:8080
