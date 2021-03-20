@@ -1,4 +1,7 @@
+pluggy
 krpc
 fastapi
 aiofiles
 orjson
+pika
+uvicorn

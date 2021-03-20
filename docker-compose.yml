@@ -25,7 +25,9 @@ services:
       - kpl
       - falcon
     depends_on:
-      - rabbit
+      - "rabbit"
+    ports:
+      - 8888:80
   rabbit:
     image: rabbitmq:alpine
     networks:
