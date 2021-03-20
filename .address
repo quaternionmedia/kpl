@@ -1,1 +1,2 @@
 export KRPC_ADDRESS=172.17.0.1
+export CROSSBAR_ADDRESS="crossbar"

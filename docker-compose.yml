@@ -19,20 +19,25 @@ services:
     image: kpl_api
     volumes:
       - ./kpl/:/kpl/kpl
-      - ./web/dist/:/app/dist/
-      - ./web/static/:/app/static/
+      # - ./web/dist/:/app/dist/
+      # - ./web/static/:/app/static/
     networks:
       - kpl
       - falcon
+    entrypoint: python3 /kpl/kpl/ckpl.py
     depends_on:
       - "crossbar"
-    ports:
-      - 8888:80
     env_file:
       - .address
+    links:
+      - "crossbar"
   crossbar:
-    image: crossbario/crossbar
+    build: cb
+    image: cb
+    networks:
+      - kpl
     volumes:
-      - ./.crossbar/:/.crossbar/
+      - ./web/dist/:/web/
+      - ./web/static/:/web/static/
     ports:
       - 8080:8080

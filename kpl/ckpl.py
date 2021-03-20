@@ -36,5 +36,6 @@ class Ckpl(ApplicationSession):
 
 
 if __name__ == '__main__':
-    runner = ApplicationRunner(environ.get("AUTOBAHN_DEMO_ROUTER", u"ws://localhost:8080/ws"), u"realm1",)
+    from config import CROSSBAR_ADDRESS, CROSSBAR_PORT
+    runner = ApplicationRunner(environ.get('AUTOBAHN_DEMO_ROUTER', f'ws://{CROSSBAR_ADDRESS}:{CROSSBAR_PORT}/ws'), u'realm1',)
     runner.run(Ckpl)
