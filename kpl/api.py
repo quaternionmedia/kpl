@@ -22,26 +22,29 @@ class Ksp:
                 address='172.17.0.1', 
                 rpc_port=50000, 
                 stream_port=50001):
-        self.connection = BlockingConnection(ConnectionParameters('rabbit'))
-        self.channel = self.connection.channel()
-        
-        self.conn = krpc.connect(
-            name=name,
-            # address='192.168.1901.130',
-            address=address,
-            rpc_port=rpc_port, stream_port=stream_port)
-        print(self.conn.krpc.get_status().version)
-        self.vessel = self.conn.space_center.active_vessel
-        self.flight = self.vessel.flight()
+        try:
+            self.connection = BlockingConnection(ConnectionParameters('rabbit'))
+            self.channel = self.connection.channel()
             
-        self.streams = []
-        
-        for char in flight_chars:
-            self.channel.queue_declare(queue=char)
-            stream = self.conn.add_stream(getattr, self.flight, char)
-            stream.add_callback(self.publish(char))
-            self.streams.append(stream)
-        [stream.start() for stream in self.streams]
+            self.conn = krpc.connect(
+                name=name,
+                # address='192.168.1901.130',
+                address=address,
+                rpc_port=rpc_port, stream_port=stream_port)
+            print(self.conn.krpc.get_status().version)
+            self.vessel = self.conn.space_center.active_vessel
+            self.flight = self.vessel.flight()
+                
+            self.streams = []
+            
+            for char in flight_chars:
+                self.channel.queue_declare(queue=char)
+                stream = self.conn.add_stream(getattr, self.flight, char)
+                stream.add_callback(self.publish(char))
+                self.streams.append(stream)
+            [stream.start() for stream in self.streams]
+        except Exception as e:
+            print('error initializing Ksp object', e)
     def publish(self, channel):
         print('setting up ', channel)
         def pub(value):
