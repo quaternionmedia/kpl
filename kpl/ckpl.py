@@ -3,11 +3,16 @@ from autobahn.asyncio.wamp import ApplicationSession, ApplicationRunner
 from os import environ
 import asyncio
 from constants import flight_chars
+from config import KRPC_ADDRESS, KRPC_PORT, KRPC_STREAM_PORT
 
 class Ckpl(ApplicationSession):
     async def onJoin(self, details):
         print('kerbal session started!')
-        self.conn = krpc.connect(name='ckpl')
+        self.conn = krpc.connect(name='ckpl',
+            address=KRPC_ADDRESS,
+            rpc_port=KRPC_PORT,
+            stream_port=KRPC_STREAM_PORT,
+        )
         print('connected!')
         self.vessel = self.conn.space_center.active_vessel
         self.refframe = self.vessel.orbit.body.reference_frame
