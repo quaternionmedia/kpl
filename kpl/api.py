@@ -5,7 +5,7 @@ from kpl.responses import ORJSONResponse
 from kpl.constants import flight_chars
 from pika import BlockingConnection, ConnectionParameters
 from json import dumps
-
+from config import KRPC_ADDRESS, KRPC_PORT, KRPC_STREAM_PORT
 
 def getAll(obj):
     # return {attr: getattr(obj, attr) for attr in flight_chars}
@@ -19,9 +19,9 @@ def getAll(obj):
 
 class Ksp:
     def __init__(self, name='kpl',
-                address='172.17.0.1', 
-                rpc_port=50000, 
-                stream_port=50001):
+                address=KRPC_ADDRESS, 
+                rpc_port=KRPC_PORT, 
+                stream_port=KRPC_STREAM_PORT):
         try:
             self.connection = BlockingConnection(ConnectionParameters('rabbit'))
             self.channel = self.connection.channel()

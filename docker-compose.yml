@@ -28,6 +28,8 @@ services:
       - "rabbit"
     ports:
       - 8888:80
+    env_file:
+      - .address
   rabbit:
     image: rabbitmq:alpine
     networks:
