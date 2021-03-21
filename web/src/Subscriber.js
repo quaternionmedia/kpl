@@ -5,7 +5,7 @@ import { SmoothieChart, TimeSeries } from 'smoothie'
 import { flight_chars } from './constants'
 
 var connection = new Connection({
-  url: 'ws://' + 'localhost:8080' + '/ws',
+  url: 'ws://' + document.location.host + '/ws',
   realm: 'realm1'
 })
 
