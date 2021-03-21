@@ -37,7 +37,7 @@ export function Subscriber() {
       chart = new SmoothieChart(opts)
       if (dimensions > 1) {
         for (var i =0; i<dimensions;i++) {
-          chart.addTimeSeries(series[i], { strokeStyle: `rgba(${i == 0 ? 255 : 0}, ${i == 1 ? 255 : 0}, ${i == 2 ? 255 : 0}, 1)` })
+          chart.addTimeSeries(series[i], { strokeStyle: `rgba(${i % 3 == 0 ? 255 : 0}, ${i == 1 ? 255 : 0}, ${i > 1 ? 255 : 0}, 1)` })
         }
       } else {
         chart.addTimeSeries(series, { strokeStyle: 'rgba(0, 255, 0, 1)' })
