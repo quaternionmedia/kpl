@@ -11,8 +11,10 @@ elif [ $1 = "install" -o $1 = "i" ]; then
 elif [ $1 = "build" ]; then
   docker run -it -v $(pwd)/web:/app -w /app -p 5555:5555 node:current-alpine yarn parcel watch --dist-dir dist --port 5555 --no-cache src/index.html
 
-elif [[ $1 = "run" || $1 =~ "serve" ]]; then
-  uvicorn --reload --host 0.0.0.0 --port 8000 api:app
+elif [[ $1 = "run" ]]; then
+  . .address
+  python3 kpl/ckpl.py
+  # uvicorn --reload --host 0.0.0.0 --port 8000 api:app
   # uvicorn api:app --port 5000 --ssl-keyfile=./testcert-key.pem --ssl-certfile=./testcert.pem --reload
 
 elif [[ $1 = "prod" || $1 = "production" ]]; then
