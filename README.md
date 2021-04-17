@@ -2,7 +2,15 @@
 ##### Kerbal Propulsion Laboratory
 Because Kerbal needs more than one screen!
 
-## install
+## run with docker
+
+`docker-compose up`
+
+Then visit [localhost:8080](http://localhost:8080)
+
+## run locally
+
+### install
 `git clone https://github.com/quaternionmedia/kpl.git`
 
 `cd kpl/`
@@ -14,12 +22,12 @@ Because Kerbal needs more than one screen!
 Install the web dependencies
 `./kpl.sh init`
 
-## build
+### build
 Build the web files
 
 `./kpl.sh build`
 
-## run
+### run
 Wtih Kerbal and krpc running:
 
 $ `kpl`
