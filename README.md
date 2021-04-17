@@ -5,11 +5,14 @@ Because Kerbal needs more than one screen!
 ## install
 `git clone https://github.com/quaternionmedia/kpl.git`
 
-`pip3 install -r requirements.txt`
+`cd kpl/`
 
-`pip3 install -e kpl`
+`pip3 install -e .`
 
 (the -e is optional, but helpful for dev environments)
+
+Install the web dependencies
+`./kpl.sh init`
 
 ## build
 Build the web files
