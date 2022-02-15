@@ -2,6 +2,13 @@
 ##### Kerbal Propulsion Laboratory
 Because Kerbal needs more than one screen!
 
+![KPL screenshot](https://images.squarespace-cdn.com/content/v1/5b54f2433e2d096995211b77/1619893912422-LVWRTHBTYR6P3MJM8L6L/kpl.jpg?format=1000w)
+
+## about
+**KPL** provides realtime flight information from [Kerbal Space Program](https://www.kerbalspaceprogram.com/) through a websocket subscription, and generates dashboard components, viewable on any networked device!
+
+More information available at [quaternion.media/kpl](https://quaternion.media/kpl)
+
 ## run with docker
 
 `docker-compose up`
